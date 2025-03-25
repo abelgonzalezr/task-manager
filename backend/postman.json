@@ -1,0 +1,313 @@
+{
+	"info": {
+		"_postman_id": "cff258e6-a7f4-4ebc-89e4-b5ef0369bdb4",
+		"name": "Task Management API",
+		"description": "API for the task management system",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "1027418"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "User Registration",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"usuario@ejemplo.com\",\n    \"password\": \"Contraseña123\",\n    \"name\": \"Nombre Completo\"\n}"
+						},
+						"url": {
+							"raw": "https://hqiey3eg22.execute-api.us-east-1.amazonaws.com/dev/auth/register",
+							"protocol": "https",
+							"host": [
+								"hqiey3eg22",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Registers a new user in the system.\n\n**Request parameters:**\n- email: User's email (also used as username)\n- password: Password (must be at least 8 characters, including one uppercase, one lowercase, and one number)\n- name: User's full name\n\n**Responses:**\n- 201: User registered successfully\n- 400: Invalid registration data\n- 409: User already exists"
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();",
+									"    const idToken = response.id_token;",
+									"    console.log('token:', idToken);",
+									"    pm.collectionVariables.set('token', idToken);",
+									"    pm.test('Token saved to variable', function() {",
+									"        pm.expect(pm.collectionVariables.get('token')).to.not.be.empty;",
+									"    });",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test789@example.com\",\n    \"password\": \"Password123#\"\n}"
+						},
+						"url": {
+							"raw": "https://hqiey3eg22.execute-api.us-east-1.amazonaws.com/dev/auth/login",
+							"protocol": "https",
+							"host": [
+								"hqiey3eg22",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Authenticates a user and returns JWT tokens.\n\n**Request parameters:**\n- email: User's email\n- password: User's password\n\n**Responses:**\n- 200: Successful login, returns access token, refresh token, and expiration time\n- 401: Invalid credentials\n- 400: Bad request"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for user registration and authentication"
+		},
+		{
+			"name": "Task Management",
+			"item": [
+				{
+					"name": "Get all tasks",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"description": "JWT Token obtained after logging in"
+							}
+						],
+						"url": {
+							"raw": "https://hqiey3eg22.execute-api.us-east-1.amazonaws.com/dev/tasks",
+							"protocol": "https",
+							"host": [
+								"hqiey3eg22",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"tasks"
+							]
+						},
+						"description": "Gets all tasks of the authenticated user.\n\n**Required headers:**\n- Authorization: JWT Token obtained after logging in\n\n**Responses:**\n- 200: List of tasks\n- 401: Unauthorized\n- 500: Server error"
+					},
+					"response": []
+				},
+				{
+					"name": "Get a specific task",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"description": "JWT Token obtained after logging in"
+							}
+						],
+						"url": {
+							"raw": "https://hqiey3eg22.execute-api.us-east-1.amazonaws.com/dev/tasks/{{taskId}}",
+							"protocol": "https",
+							"host": [
+								"hqiey3eg22",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"tasks",
+								"{{taskId}}"
+							]
+						},
+						"description": "Gets a specific task by its ID.\n\n**Required headers:**\n- Authorization: JWT Token obtained after logging in\n\n**Path parameters:**\n- taskId: ID of the task to retrieve\n\n**Responses:**\n- 200: Task details\n- 401: Unauthorized\n- 404: Task not found\n- 500: Server error"
+					},
+					"response": []
+				},
+				{
+					"name": "Create a new task",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"description": "JWT Token obtained after logging in"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Task Title\",\n    \"description\": \"Detailed task description\",\n    \"due_date\": \"2023-12-31T23:59:59Z\",\n    \"priority\": \"high\",\n    \"status\": \"to_do\" // permitted: 'to_do', 'in_progress', 'completed'\n}"
+						},
+						"url": {
+							"raw": "https://hqiey3eg22.execute-api.us-east-1.amazonaws.com/dev/tasks",
+							"protocol": "https",
+							"host": [
+								"hqiey3eg22",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"tasks"
+							]
+						},
+						"description": "Creates a new task for the authenticated user.\n\n**Required headers:**\n- Authorization: JWT Token obtained after logging in\n- Content-Type: application/json\n\n**Request parameters:**\n- title: Task title (required)\n- description: Task description (optional)\n- due_date: Deadline in ISO format (optional)\n- priority: Task priority (high, medium, low) (optional, default: medium)\n- status: Task status (to_do, in_progress, completed) (optional, default: to_do)\n\n**Responses:**\n- 201: Task created successfully\n- 400: Invalid task data\n- 401: Unauthorized\n- 500: Server error"
+					},
+					"response": []
+				},
+				{
+					"name": "Update a task",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"description": "JWT Token obtained after logging in"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Updated Title\",\n    \"description\": \"Updated Description\",\n    \"due_date\": \"2023-12-31T23:59:59Z\",\n    \"priority\": \"low\",\n    \"status\": \"completed\"\n}"
+						},
+						"url": {
+							"raw": "https://hqiey3eg22.execute-api.us-east-1.amazonaws.com/dev/tasks/{{taskId}}",
+							"protocol": "https",
+							"host": [
+								"hqiey3eg22",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"tasks",
+								"{{taskId}}"
+							]
+						},
+						"description": "Updates an existing task of the authenticated user.\n\n**Required headers:**\n- Authorization: JWT Token obtained after logging in\n- Content-Type: application/json\n\n**Path parameters:**\n- taskId: ID of the task to update\n\n**Request parameters (all optional):**\n- title: Updated title of the task\n- description: Updated description of the task\n- due_date: Updated deadline in ISO format\n- priority: Updated priority of the task (high, medium, low)\n- status: Updated status of the task (to_do, in_progress, completed)\n\n**Responses:**\n- 200: Task updated successfully\n- 400: Invalid task data\n- 401: Unauthorized\n- 404: Task not found\n- 500: Server error"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete a task",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"description": "JWT Token obtained after logging in"
+							}
+						],
+						"url": {
+							"raw": "https://hqiey3eg22.execute-api.us-east-1.amazonaws.com/dev/tasks/{{taskId}}",
+							"protocol": "https",
+							"host": [
+								"hqiey3eg22",
+								"execute-api",
+								"us-east-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"tasks",
+								"{{taskId}}"
+							]
+						},
+						"description": "Deletes a specific task of the authenticated user.\n\n**Required headers:**\n- Authorization: JWT Token obtained after logging in\n\n**Path parameters:**\n- taskId: ID of the task to delete\n\n**Responses:**\n- 204: Task deleted successfully\n- 401: Unauthorized\n- 404: Task not found\n- 500: Server error"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for managing tasks"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "token",
+			"value": "your-jwt-token-here",
+			"type": "string"
+		},
+		{
+			"key": "idToken",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

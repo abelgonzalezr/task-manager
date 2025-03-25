@@ -1,0 +1,133 @@
+service: task-management-serverlesss
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: python3.9
+  stage: ${opt:stage, 'dev'}
+  region: us-east-1
+  environment:
+    MONGODB_URI: ${self:custom.environment.MONGODB_URI}
+    MONGODB_DB_NAME: ${self:custom.environment.MONGODB_DB_NAME}
+    COGNITO_USER_POOL_ID: ${self:custom.environment.COGNITO_USER_POOL_ID}
+    COGNITO_CLIENT_ID: ${self:custom.environment.COGNITO_CLIENT_ID}
+    COGNITO_CLIENT_SECRET: ${self:custom.environment.COGNITO_CLIENT_SECRET}
+    REGION: us-east-1
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - cognito-idp:AdminConfirmSignUp
+            - cognito-idp:AdminInitiateAuth
+            - cognito-idp:SignUp
+          Resource: !Sub arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${self:custom.environment.COGNITO_USER_POOL_ID}
+
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-python-requirements
+  - serverless-offline
+
+custom:
+  environment: ${file(./env.json)}
+  dotenv:
+    path: ./.env
+  pythonRequirements:
+    dockerizePip: true
+    slim: false
+    layer: false
+
+package:
+  individually: true
+  exclude:
+    - node_modules/**
+    - .venv/**
+    - .env
+    - README.md
+
+functions:
+  # Authentication functions
+  register:
+    handler: auth/handler.register
+    events:
+      - http:
+          path: /auth/register
+          method: post
+          cors: true
+  
+  login:
+    handler: auth/handler.login
+    events:
+      - http:
+          path: /auth/login
+          method: post
+          cors: true
+  
+  # CRUD functions for tasks
+  getTasks:
+    handler: tasks/handler.get_tasks
+    events:
+      - http:
+          path: /tasks
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+  
+  getTask:
+    handler: tasks/handler.get_task
+    events:
+      - http:
+          path: /tasks/{taskId}
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+  
+  createTask:
+    handler: tasks/handler.create_task
+    events:
+      - http:
+          path: /tasks
+          method: post
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+  
+  updateTask:
+    handler: tasks/handler.update_task
+    events:
+      - http:
+          path: /tasks/{taskId}
+          method: put
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+  
+  deleteTask:
+    handler: tasks/handler.delete_task
+    events:
+      - http:
+          path: /tasks/{taskId}
+          method: delete
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId: !Ref ApiGatewayAuthorizer
+
+resources:
+  Resources:
+    ApiGatewayAuthorizer:
+      Type: AWS::ApiGateway::Authorizer
+      Properties:
+        Name: cognito-authorizer
+        IdentitySource: method.request.header.Authorization
+        RestApiId: !Ref ApiGatewayRestApi
+        Type: COGNITO_USER_POOLS
+        ProviderARNs:
+          - !Sub arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${self:custom.environment.COGNITO_USER_POOL_ID} 
