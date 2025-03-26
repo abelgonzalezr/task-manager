@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '../types/user';
-import { isAuthenticated, logout } from '../services/authService';
+import { isAuthenticated, logout, getCurrentUser } from '../services/authService';
 
 interface AuthContextType {
   isLoggedIn: boolean;
@@ -20,22 +20,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const authStatus = isAuthenticated();
     setIsLoggedIn(authStatus);
 
-    // Attempt to get user info from local storage
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error('Error parsing user from localStorage:', error);
+    // Get user info from local storage
+    if (authStatus) {
+      const currentUser = getCurrentUser();
+      if (currentUser) {
+        setUser(currentUser);
       }
     }
   }, []);
+
+  // Update isLoggedIn when user changes
+  useEffect(() => {
+    setIsLoggedIn(!!user);
+  }, [user]);
 
   const handleLogout = () => {
     logout();
     setIsLoggedIn(false);
     setUser(null);
-    localStorage.removeItem('user');
   };
 
   return (

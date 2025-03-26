@@ -28,18 +28,13 @@ const Login: React.FC = () => {
     setLoading(true);
     
     try {
-      await login({ email, password });
+      // Get tokens and user info
+      const { user } = await login({ email, password });
       
-      // Set basic user info in context
-      const userInfo = {
-        user_id: 'unknown', // We'll get this from the token or API
-        email: email,
-        name: 'User' // We'll get this from API
-      };
+      // Update user in auth context
+      setUser(user);
       
-      setUser(userInfo);
-      localStorage.setItem('user', JSON.stringify(userInfo));
-      
+      // Redirect to the dashboard
       navigate('/');
     } catch (error: any) {
       console.error('Login error:', error);
@@ -50,64 +45,61 @@ const Login: React.FC = () => {
   };
 
   return (
-    <Container component="main" maxWidth="xs">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Paper elevation={3} sx={{ p: 4, width: '100%' }}>
-          <Typography component="h1" variant="h5" align="center" gutterBottom>
-            Sign In
-          </Typography>
-          
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-          
-          <Box component="form" onSubmit={handleSubmit} noValidate>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              autoFocus
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-              disabled={loading}
-            >
-              {loading ? 'Signing in...' : 'Sign In'}
-            </Button>
-            <Box sx={{ textAlign: 'center' }}>
-              <MuiLink component={Link} to="/register" variant="body2">
-                {"Don't have an account? Sign Up"}
-              </MuiLink>
-            </Box>
-          </Box>
-        </Paper>
+    <Container maxWidth="sm" sx={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+      <Box sx={{ mb: 4, textAlign: 'center' }}>
+        <Typography variant="h4" component="h1" color="primary" gutterBottom>
+          Task Manager
+        </Typography>
       </Box>
+      
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
+        <Typography component="h2" variant="h5" align="center" gutterBottom>
+          Sign In
+        </Typography>
+        
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        
+        <Box component="form" onSubmit={handleSubmit} noValidate>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="email"
+            label="Email Address"
+            name="email"
+            autoComplete="email"
+            autoFocus
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Password"
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+            disabled={loading}
+          >
+            {loading ? 'Signing in...' : 'Sign In'}
+          </Button>
+          <Box sx={{ textAlign: 'center' }}>
+            <MuiLink component={Link} to="/register" variant="body2">
+              {"Don't have an account? Sign Up"}
+            </MuiLink>
+          </Box>
+        </Box>
+      </Paper>
     </Container>
   );
 };

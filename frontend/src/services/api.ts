@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Define the API base URL
-const API_BASE_URL = 'https://hqiey3eg22.execute-api.us-east-1.amazonaws.com/dev';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://hqiey3eg22.execute-api.us-east-1.amazonaws.com/dev';
 
 // Create an axios instance with defaults
 const api = axios.create({

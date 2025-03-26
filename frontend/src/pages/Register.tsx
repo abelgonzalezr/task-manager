@@ -92,96 +92,93 @@ const Register: React.FC = () => {
   };
 
   return (
-    <Container component="main" maxWidth="xs">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Paper elevation={3} sx={{ p: 4, width: '100%' }}>
-          <Typography component="h1" variant="h5" align="center" gutterBottom>
-            Sign Up
-          </Typography>
-          
-          {apiError && <Alert severity="error" sx={{ mb: 2 }}>{apiError}</Alert>}
-          {success && <Alert severity="success" sx={{ mb: 2 }}>Registration successful! Redirecting to login...</Alert>}
-          
-          <Box component="form" onSubmit={handleSubmit} noValidate>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="name"
-              label="Full Name"
-              name="name"
-              autoComplete="name"
-              autoFocus
-              value={formData.name}
-              onChange={handleChange}
-              error={!!errors.name}
-              helperText={errors.name}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              value={formData.email}
-              onChange={handleChange}
-              error={!!errors.email}
-              helperText={errors.email}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="new-password"
-              value={formData.password}
-              onChange={handleChange}
-              error={!!errors.password}
-              helperText={errors.password}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="confirmPassword"
-              label="Confirm Password"
-              type="password"
-              id="confirmPassword"
-              autoComplete="new-password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              error={!!errors.confirmPassword}
-              helperText={errors.confirmPassword}
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-              disabled={loading || success}
-            >
-              {loading ? 'Signing up...' : 'Sign Up'}
-            </Button>
-            <Box sx={{ textAlign: 'center' }}>
-              <MuiLink component={Link} to="/login" variant="body2">
-                {"Already have an account? Sign In"}
-              </MuiLink>
-            </Box>
-          </Box>
-        </Paper>
+    <Container maxWidth="sm" sx={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+      <Box sx={{ mb: 4, textAlign: 'center' }}>
+        <Typography variant="h4" component="h1" color="primary" gutterBottom>
+          Task Manager
+        </Typography>
       </Box>
+      
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
+        <Typography component="h2" variant="h5" align="center" gutterBottom>
+          Sign Up
+        </Typography>
+        
+        {apiError && <Alert severity="error" sx={{ mb: 2 }}>{apiError}</Alert>}
+        {success && <Alert severity="success" sx={{ mb: 2 }}>Registration successful! Redirecting to login...</Alert>}
+        
+        <Box component="form" onSubmit={handleSubmit} noValidate>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="name"
+            label="Full Name"
+            name="name"
+            autoComplete="name"
+            autoFocus
+            value={formData.name}
+            onChange={handleChange}
+            error={!!errors.name}
+            helperText={errors.name}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="email"
+            label="Email Address"
+            name="email"
+            autoComplete="email"
+            value={formData.email}
+            onChange={handleChange}
+            error={!!errors.email}
+            helperText={errors.email}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Password"
+            type="password"
+            id="password"
+            autoComplete="new-password"
+            value={formData.password}
+            onChange={handleChange}
+            error={!!errors.password}
+            helperText={errors.password}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="confirmPassword"
+            label="Confirm Password"
+            type="password"
+            id="confirmPassword"
+            autoComplete="new-password"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            error={!!errors.confirmPassword}
+            helperText={errors.confirmPassword}
+          />
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+            disabled={loading || success}
+          >
+            {loading ? 'Signing up...' : 'Sign Up'}
+          </Button>
+          <Box sx={{ textAlign: 'center' }}>
+            <MuiLink component={Link} to="/login" variant="body2">
+              {"Already have an account? Sign In"}
+            </MuiLink>
+          </Box>
+        </Box>
+      </Paper>
     </Container>
   );
 };

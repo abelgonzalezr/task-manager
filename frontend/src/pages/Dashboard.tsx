@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Box, Grid, CircularProgress, Alert } from '@mui/material';
+import { 
+  Container, 
+  Typography, 
+  Box, 
+  Grid, 
+  CircularProgress, 
+  Alert, 
+  Fab, 
+  Tooltip,
+  useTheme
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import TaskCard from '../components/TaskCard';
 import TaskForm from '../components/TaskForm';
 import { Task } from '../types/task';
@@ -10,6 +21,8 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
   const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
+  const [openTaskForm, setOpenTaskForm] = useState<boolean>(false);
+  const theme = useTheme();
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -45,12 +58,10 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4, position: 'relative', minHeight: '80vh' }}>
       <Typography variant="h4" component="h1" gutterBottom>
         Task Manager
       </Typography>
-      
-      <TaskForm onTaskCreated={handleTaskCreated} />
       
       {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
       
@@ -59,7 +70,7 @@ const Dashboard: React.FC = () => {
           <CircularProgress />
         </Box>
       ) : tasks.length === 0 ? (
-        <Alert severity="info">You don't have any tasks yet. Create one above!</Alert>
+        <Alert severity="info">You don't have any tasks yet. Click the + button to create one!</Alert>
       ) : (
         <Box mt={3}>
           <Typography variant="h5" gutterBottom>
@@ -67,7 +78,7 @@ const Dashboard: React.FC = () => {
           </Typography>
           <Grid container spacing={3}>
             {tasks.map((task) => (
-              <Grid item xs={12} md={6} lg={4} key={task.id}>
+              <Grid item xs={12} sm={6} md={4} key={task.id}>
                 <TaskCard 
                   task={task} 
                   onTaskUpdate={handleTaskUpdate} 
@@ -78,6 +89,30 @@ const Dashboard: React.FC = () => {
           </Grid>
         </Box>
       )}
+      
+      {/* Floating Action Button */}
+      <Tooltip title="Add New Task" arrow>
+        <Fab 
+          color="primary" 
+          aria-label="add" 
+          sx={{ 
+            position: 'fixed', 
+            bottom: theme.spacing(4), 
+            right: theme.spacing(4),
+            boxShadow: 3
+          }}
+          onClick={() => setOpenTaskForm(true)}
+        >
+          <AddIcon />
+        </Fab>
+      </Tooltip>
+      
+      {/* Task Form Dialog */}
+      <TaskForm 
+        open={openTaskForm} 
+        onClose={() => setOpenTaskForm(false)} 
+        onTaskCreated={handleTaskCreated} 
+      />
     </Container>
   );
 };

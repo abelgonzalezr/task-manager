@@ -7,14 +7,18 @@ import {
   MenuItem, 
   FormControl, 
   InputLabel, 
-  Typography,
-  Paper,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   SelectChangeEvent
 } from '@mui/material';
 import { TaskCreate, TaskStatus } from '../types/task';
 import { createTask } from '../services/taskService';
 
 interface TaskFormProps {
+  open: boolean;
+  onClose: () => void;
   onTaskCreated: () => void;
 }
 
@@ -24,7 +28,7 @@ const initialTaskData: TaskCreate = {
   status: TaskStatus.TODO
 };
 
-const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
+const TaskForm: React.FC<TaskFormProps> = ({ open, onClose, onTaskCreated }) => {
   const [taskData, setTaskData] = useState<TaskCreate>(initialTaskData);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -69,71 +73,101 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
       await createTask(taskData);
       setTaskData(initialTaskData);
       onTaskCreated();
+      onClose();
     } catch (error) {
       console.error('Error creating task:', error);
     }
   };
 
+  const handleClose = () => {
+    setTaskData(initialTaskData);
+    setErrors({});
+    onClose();
+  };
+
   return (
-    <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
-      <Typography variant="h6" component="h2" gutterBottom>
+    <Dialog 
+      open={open} 
+      onClose={handleClose}
+      fullWidth
+      maxWidth="sm"
+      disablePortal={false}
+      disableEnforceFocus={false}
+      disableAutoFocus={false}
+      hideBackdrop={false}
+      aria-modal="true"
+      container={document.body}
+      role="dialog"
+      keepMounted={false}
+    >
+      <DialogTitle>
         Add New Task
-      </Typography>
+      </DialogTitle>
       
-      <Box component="form" onSubmit={handleSubmit} noValidate>
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          id="title"
-          label="Task Title"
-          name="title"
-          value={taskData.title}
-          onChange={handleChange}
-          error={!!errors.title}
-          helperText={errors.title}
-        />
-        
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          id="description"
-          label="Description"
-          name="description"
-          value={taskData.description}
-          onChange={handleChange}
-          multiline
-          rows={3}
-          error={!!errors.description}
-          helperText={errors.description}
-        />
-        
-        <FormControl fullWidth margin="normal">
-          <InputLabel id="status-label">Status</InputLabel>
-          <Select
-            labelId="status-label"
-            id="status"
-            value={taskData.status}
-            label="Status"
-            onChange={handleStatusChange}
-          >
-            <MenuItem value={TaskStatus.TODO}>To Do</MenuItem>
-            <MenuItem value={TaskStatus.IN_PROGRESS}>In Progress</MenuItem>
-            <MenuItem value={TaskStatus.COMPLETED}>Completed</MenuItem>
-          </Select>
-        </FormControl>
-        
-        <Button
-          type="submit"
-          fullWidth
+      <DialogContent>
+        <Box component="form" noValidate sx={{ mt: 1 }}>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="title"
+            label="Task Title"
+            name="title"
+            autoFocus
+            value={taskData.title}
+            onChange={handleChange}
+            error={!!errors.title}
+            helperText={errors.title}
+          />
+          
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="description"
+            label="Description"
+            name="description"
+            value={taskData.description}
+            onChange={handleChange}
+            multiline
+            rows={3}
+            error={!!errors.description}
+            helperText={errors.description}
+          />
+          
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="status-label">Status</InputLabel>
+            <Select
+              labelId="status-label"
+              id="status"
+              value={taskData.status}
+              label="Status"
+              onChange={handleStatusChange}
+            >
+              <MenuItem value={TaskStatus.TODO}>To Do</MenuItem>
+              <MenuItem value={TaskStatus.IN_PROGRESS}>In Progress</MenuItem>
+              <MenuItem value={TaskStatus.COMPLETED}>Completed</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+      </DialogContent>
+      
+      <DialogActions sx={{ px: 3, pb: 3 }}>
+        <Button 
+          onClick={handleClose}
+          color="inherit"
+        >
+          Cancel
+        </Button>
+        <Button 
+          onClick={handleSubmit}
           variant="contained"
-          sx={{ mt: 3, mb: 2 }}
+          color="primary"
         >
           Add Task
         </Button>
-      </Box>
-    </Paper>
+      </DialogActions>
+    </Dialog>
   );
 };
 

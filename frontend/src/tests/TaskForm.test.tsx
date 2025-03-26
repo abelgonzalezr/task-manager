@@ -19,13 +19,20 @@ jest.mock('../services/taskService', () => ({
 
 describe('TaskForm Component', () => {
   const mockOnTaskCreated = jest.fn();
+  const mockOnClose = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  test('renders the form correctly', () => {
-    render(<TaskForm onTaskCreated={mockOnTaskCreated} />);
+  test('renders the form correctly when open', () => {
+    render(
+      <TaskForm 
+        open={true} 
+        onClose={mockOnClose} 
+        onTaskCreated={mockOnTaskCreated} 
+      />
+    );
     
     // Check if form elements are displayed
     expect(screen.getByText('Add New Task')).toBeInTheDocument();
@@ -33,11 +40,31 @@ describe('TaskForm Component', () => {
     expect(screen.getByLabelText(/Description/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Status/i)).toBeInTheDocument();
     expect(screen.getByText('Add Task')).toBeInTheDocument();
+    expect(screen.getByText('Cancel')).toBeInTheDocument();
+  });
+
+  test('does not render when closed', () => {
+    render(
+      <TaskForm 
+        open={false} 
+        onClose={mockOnClose} 
+        onTaskCreated={mockOnTaskCreated} 
+      />
+    );
+    
+    // The dialog should not be in the document
+    expect(screen.queryByText('Add New Task')).not.toBeInTheDocument();
   });
 
   test('submits the form with valid data', async () => {
     const { createTask } = require('../services/taskService');
-    render(<TaskForm onTaskCreated={mockOnTaskCreated} />);
+    render(
+      <TaskForm 
+        open={true} 
+        onClose={mockOnClose} 
+        onTaskCreated={mockOnTaskCreated} 
+      />
+    );
     
     // Fill the form
     fireEvent.change(screen.getByLabelText(/Task Title/i), {
@@ -51,30 +78,54 @@ describe('TaskForm Component', () => {
     // Submit the form
     fireEvent.click(screen.getByText('Add Task'));
     
-    // Wait for the form submission to complete
+    // Check if API was called with correct data
     await waitFor(() => {
-      // Check if API was called with correct data
       expect(createTask).toHaveBeenCalledWith({
         title: 'New Task',
         description: 'Task description',
         status: TaskStatus.TODO
       });
-      
-      // Check if the callback was called
-      expect(mockOnTaskCreated).toHaveBeenCalled();
     });
+    
+    // Check if the callbacks were called
+    expect(mockOnTaskCreated).toHaveBeenCalled();
+    expect(mockOnClose).toHaveBeenCalled();
   });
 
   test('shows validation errors for empty fields', async () => {
-    render(<TaskForm onTaskCreated={mockOnTaskCreated} />);
+    render(
+      <TaskForm 
+        open={true} 
+        onClose={mockOnClose} 
+        onTaskCreated={mockOnTaskCreated} 
+      />
+    );
     
     // Submit the form without filling any fields
     fireEvent.click(screen.getByText('Add Task'));
     
-    // Check for validation errors
+    // Check for the first validation error
     await waitFor(() => {
       expect(screen.getByText('Title is required')).toBeInTheDocument();
-      expect(screen.getByText('Description is required')).toBeInTheDocument();
     });
+    
+    // Check for the second validation error
+    expect(screen.getByText('Description is required')).toBeInTheDocument();
+  });
+  
+  test('closes the form when Cancel is clicked', () => {
+    render(
+      <TaskForm 
+        open={true} 
+        onClose={mockOnClose} 
+        onTaskCreated={mockOnTaskCreated} 
+      />
+    );
+    
+    // Click the Cancel button
+    fireEvent.click(screen.getByText('Cancel'));
+    
+    // Check if onClose was called
+    expect(mockOnClose).toHaveBeenCalled();
   });
 }); 
