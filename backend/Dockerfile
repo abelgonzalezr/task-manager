@@ -2,7 +2,7 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-# Instalar Node.js y npm para Serverless Framework
+# Install Node.js and npm for Serverless Framework
 RUN apt-get update && apt-get install -y \
     curl \
     gnupg \
@@ -11,25 +11,25 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Instalar dependencias de Python
+# Install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Instalar serverless global y dependencias de Node.js
+# Install global serverless and Node.js dependencies with --legacy-peer-deps
 COPY package.json package-lock.json ./
-RUN npm ci && npm install -g serverless
+RUN npm ci --legacy-peer-deps && npm install -g serverless@3.40.0
 
-# Copiar el código
+# Copy the code
 COPY . .
 
-# Puerto para desarrollo local
+# Port for local development
 EXPOSE 3000
 
-# Script de inicio
+# Startup script
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 
-# Por defecto, iniciar serverless offline
-CMD ["npx", "serverless", "offline", "--host", "0.0.0.0"] 
+# By default, start serverless offline
+CMD ["npx", "serverless", "offline", "--host", "0.0.0.0"]

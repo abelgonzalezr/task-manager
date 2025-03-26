@@ -1,7 +1,7 @@
-version: '3.8'
+# Configuration for development and testing environment
 
 services:
-  # Base de datos MongoDB
+  # MongoDB Database
   mongodb:
     image: mongo:latest
     container_name: mongodb
@@ -15,7 +15,7 @@ services:
     networks:
       - app-network
 
-  # Backend con Serverless
+  # Backend with Serverless
   backend:
     build:
       context: ./backend
@@ -38,7 +38,7 @@ services:
     networks:
       - app-network
 
-  # Frontend con React
+  # Frontend with React
   frontend:
     build:
       context: ./frontend
@@ -61,4 +61,4 @@ networks:
 
 volumes:
   mongodb_data:
-    driver: local 
+    driver: local
