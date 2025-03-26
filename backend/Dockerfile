@@ -15,15 +15,21 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Instalar dependencias de Node.js
-COPY package.json .
-RUN npm install
+# Instalar serverless global y dependencias de Node.js
+COPY package.json package-lock.json ./
+RUN npm ci && npm install -g serverless
 
 # Copiar el código
 COPY . .
 
-# Puerto para desarrollo local (si es necesario)
+# Puerto para desarrollo local
 EXPOSE 3000
 
-# Por defecto, mostrar la ayuda de Serverless
-CMD ["npx", "serverless", "--help"] 
+# Script de inicio
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+ENTRYPOINT ["docker-entrypoint.sh"]
+
+# Por defecto, iniciar serverless offline
+CMD ["npx", "serverless", "offline", "--host", "0.0.0.0"] 

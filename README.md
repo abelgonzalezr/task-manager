@@ -72,3 +72,7 @@ Refer to the CloudFormation templates in the AWS directory for infrastructure as
 ## License
 
 This project is licensed under the MIT License. 
+
+## Development Mode
+
+To run the application in development mode:    ./start-dev.sh
